@@ -20,7 +20,7 @@ parser for 內政部不動產成交案件 open data
 	- [預售屋買賣](https://s3-ap-northeast-1.amazonaws.com/aaron-public-access/real-estate-price/presold_house_trade.pkl)
 
 
-## translate columns
+## Translated columns
 
 | original name | translated name |
 | ------------- | --------------- |
