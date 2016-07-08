@@ -1,6 +1,6 @@
 # Description
 
-parse for 內政部不動產成交案件 open data
+parser for 內政部不動產成交案件 open data
 
 # Steps:
 
