@@ -6,37 +6,78 @@ import re
 
 
 region_mapping = '''
-    C,基隆市
-    A,臺北市
-    F,新北市
-    H,桃園縣
-    O,新竹市
-    J,新竹縣
-    K,苗栗縣
-    B,臺中市
-    M,南投縣
-    N,彰化縣
-    P,雲林縣
-    I,嘉義市
-    Q,嘉義縣
-    D,臺南市
-    E,高雄市
-    T,屏東縣
-    G,宜蘭縣
-    U,花蓮縣
-    V,臺東縣
-    X,澎湖縣
-    W,金門縣
-    Z,連江縣
+    C,keelung
+    A,taipei_city
+    F,new_taipei_city
+    H,taoyuan
+    O,hsinchu_city
+    J,hsinchu_county
+    K,miaoli
+    B,taichung_city
+    M,nantou
+    N,changhua
+    P,yunlin
+    I,chiayi_city
+    Q,chiayi_county
+    D,tainan_city
+    E,kaohsiung_city
+    T,pingtung
+    G,yilan
+    U,hualian
+    V,taitung
+    X,penghu
+    W,kinmen
+    Z,lianjiang
 '''.strip().split('\n')
 region_mapping = dict([x.strip().split(',') for x in region_mapping])
 
 deal_type_mapping = '''
-    A:不動產買賣
-    B:預售屋買賣
-    C:不動產租賃
+    A:real_estate_trade
+    B:presold_house_trade
+    C:real_estate_rental
 '''.strip().split('\n')
 deal_type_mapping = dict([x.strip().split(':') for x in deal_type_mapping])
+
+column_mapping = {
+    u'鄉鎮市區': 'zone',
+    u'交易標的': 'trade_object',
+    u'租賃標的': 'rental_object',
+    u'土地區段位置或建物區門牌': 'address',
+    u'土地移轉總面積平方公尺': 'transferred_size',
+    u'租賃總面積平方公尺': 'rental_size',
+    u'都市土地使用分區': 'city_estate_type',
+    u'非都市土地使用分區': 'country_estate_type',
+    u'非都市土地使用編定': 'country_estate_use',
+    u'交易年月日': 'trade_time',
+    u'租賃年月日': 'rental_time',
+    u'交易筆棟數': 'trade_building_count',
+    u'租賃筆棟數': 'rental_building_count',
+    u'移轉層次': 'n_transferred_floor',
+    u'租賃層次': 'n_rental_floor',
+    u'總樓層數': 'n_floor',
+    u'建物型態': 'building_type',
+    u'主要用途': 'main_usage',
+    u'主要建材': 'main_material',
+    u'建築完成年月': 'built_time',
+    u'建物移轉總面積平方公尺': 'transferred_size',
+    u'租賃總面積平方公尺': 'rental_size',
+    u'建物現況格局-房': 'n_bedroom',
+    u'建物現況格局-廳': 'n_living_room',
+    u'建物現況格局-衛': 'n_bathroom',
+    u'建物現況格局-隔間': 'has_partition',
+    u'有無管理組織': 'has_admin',
+    u'有無附傢俱': 'has_furniture',
+    u'總價元': 'trade_price',
+    u'總額元': 'rental_price',
+    u'單價每平方公尺': 'price_per_m2',
+    u'車位類別': 'parking_type',
+    u'車位移轉總面積平方公尺': 'parking_size',
+    u'租賃總面積平方公尺': 'rental_size',
+    u'車位總價元': 'parking_price',
+    u'租金總額元': 'another_rental_price',
+    u'備註': 'remark',
+    u'編號': 'index'
+}
 
 
 def parse_line(line, nrows):
@@ -53,14 +94,15 @@ def parse_file(filename):
         for line in f:
             nrow += 1
             if nrow == 1:
-                fields = line.strip().split(',')
+                columns = line.strip().split(',')
+                columns = [column_mapping[x] for x in columns]
             else:
-                data = parse_line(line, len(fields))
+                data = parse_line(line, len(columns))
                 dataset.append(data)
 
     if len(dataset) != 0:
-        df = pd.DataFrame(dataset, columns=fields)
-        df = df.set_index(u'編號')
+        df = pd.DataFrame(dataset, columns=columns)
+        df = df.set_index('index')
     else:
         df = pd.DataFrame()
 
