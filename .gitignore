@@ -1,4 +1,5 @@
 .DS_Store
 data/
 data2/
-*.gz
+*.pkl
+*.swp
