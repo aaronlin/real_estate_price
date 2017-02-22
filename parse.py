@@ -43,7 +43,7 @@ column_mapping = {
     u'交易標的': 'trade_object',
     u'租賃標的': 'rental_object',
     u'土地區段位置或建物區門牌': 'address',
-    u'土地移轉總面積平方公尺': 'transferred_size',
+    u'土地移轉總面積平方公尺': 'transferred_land_size',
     u'租賃總面積平方公尺': 'rental_size',
     u'都市土地使用分區': 'city_estate_type',
     u'非都市土地使用分區': 'country_estate_type',
@@ -59,7 +59,7 @@ column_mapping = {
     u'主要用途': 'main_usage',
     u'主要建材': 'main_material',
     u'建築完成年月': 'built_time',
-    u'建物移轉總面積平方公尺': 'transferred_size',
+    u'建物移轉總面積平方公尺': 'transferred_building_size',
     u'租賃總面積平方公尺': 'rental_size',
     u'建物現況格局-房': 'n_bedroom',
     u'建物現況格局-廳': 'n_living_room',
@@ -102,7 +102,6 @@ def parse_file(filename):
 
     if len(dataset) != 0:
         df = pd.DataFrame(dataset, columns=columns)
-        df = df.set_index('index')
     else:
         df = pd.DataFrame()
 
@@ -132,7 +131,7 @@ if __name__ == '__main__':
             fullpath = os.path.join(dirpath, filename)
             is_valid, quarter, region, deal_type = check_file(fullpath)
             if is_valid:
-                print fullpath
+                print(fullpath)
                 df = parse_file(fullpath)
                 df['region'] = region_mapping[region]
                 df['quarter'] = quarter
@@ -143,7 +142,11 @@ if __name__ == '__main__':
                     else:
                         dataset[deal_type] = dataset[deal_type].append(df)
 
+    filename = 'real_estate.h5'
     for deal_type in dataset:
-        filename = '%s.pkl' % deal_type_mapping[deal_type]
-        print 'write file %s' % filename
-        dataset[deal_type].to_pickle(filename)
+        df = dataset[deal_type].reset_index(drop=True)
+        if 'rental_size' in df.columns:
+            rental_size = df.rental_size.max(axis=1)
+            df = df.drop('rental_size', 1)
+            df['rental_size'] = rental_size
+        df.to_hdf(filename, key=deal_type_mapping[deal_type])
